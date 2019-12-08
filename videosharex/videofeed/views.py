@@ -75,10 +75,22 @@ class RecommendYouTubeVideo(APIView):
         shares = YouTubeVideoRecommendationShare.objects.order_by('-created_at')
 
         following_shares = [share for share in shares if share.sharer in following and share.recommendation.poster.id != request.user.id]
+        non_redundant_shares = []
 
-        prioritized_shares = prioritize_similar_preferences(request.user, following_shares)
+        recommendations = set()
 
-        recommendations = [share.recommendation for share in following_shares]
+        for following_share in following_shares:
+            recommendation_id = following_share.recommendation.id
+
+            if recommendation_id in recommendations:
+                continue
+            else:
+                recommendations.add(recommendation_id)
+                non_redundant_shares.append(following_share)
+
+        prioritized_shares = prioritize_similar_preferences(request.user, non_redundant_shares)
+
+        recommendations = [share.recommendation for share in prioritized_shares]
         payloads = [self.payload(request, recommendation) for recommendation in recommendations]
 
         return Response(payloads)

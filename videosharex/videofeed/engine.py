@@ -24,7 +24,7 @@ def prioritize_similar_preferences(user, shares):
         share_similarities.append((share, similarity))
 
     _sorted = sorted(share_similarities, key=lambda tuple: tuple[1], reverse=True)
-    shares = [share_similarity[0] for share_similarity in share_similarities]
+    shares = [share_similarity[0] for share_similarity in _sorted]
     return shares
 
 def measure_similarity(user_shares, sharer_shares):
